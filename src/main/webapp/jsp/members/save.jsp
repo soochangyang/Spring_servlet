@@ -8,6 +8,7 @@
     String userName = request.getParameter("userName");
     int age = Integer.parseInt(request.getParameter("age"));
     Member member = new Member(userName, age);
+    memberRepository.save(member);
 %>
 <html>
 <head>
