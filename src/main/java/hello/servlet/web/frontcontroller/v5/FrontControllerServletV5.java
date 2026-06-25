@@ -10,12 +10,13 @@ import hello.servlet.web.frontcontroller.v4.controller.MemberFormControllerV4;
 import hello.servlet.web.frontcontroller.v4.controller.MemberListControllerV4;
 import hello.servlet.web.frontcontroller.v4.controller.MemberSaveControllerV4;
 import hello.servlet.web.frontcontroller.v5.adapter.ControllerV3HandlerAdapter;
+import hello.servlet.web.frontcontroller.v5.adapter.ControllerV4HandlerAdapter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.web.servlet.HandlerAdapter;
+import org.jspecify.annotations.NonNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,18 +39,26 @@ public class FrontControllerServletV5 extends HttpServlet {
 
     private void initHandlerAdapters(){
         handlerAdapters.add(new ControllerV3HandlerAdapter());
+        handlerAdapters.add(new ControllerV4HandlerAdapter());
     }
 
     private void initHandlerMappingMap(){
-        handlerMap.put("/front-controller/v3/members/new-form", new MemberFormControllerV3());
-        handlerMap.put("/front-controller/v3/members/save", new MemberSaveControllerV3());
-        handlerMap.put("/front-controller/v3/members", new MemberListControllerV3());
+        //v3
+        handlerMap.put("/front-controller/v5/v3/members/new-form", new MemberFormControllerV3());
+        handlerMap.put("/front-controller/v5/v3/members/save", new MemberSaveControllerV3());
+        handlerMap.put("/front-controller/v5/v3/members", new MemberListControllerV3());
+
+        //v4
+        handlerMap.put("/front-controller/v5/v4/members/new-form", new MemberFormControllerV4());
+        handlerMap.put("/front-controller/v5/v4/members/save", new MemberSaveControllerV4());
+        handlerMap.put("/front-controller/v5/v4/members", new MemberListControllerV4());
     }
 
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
+        // handler map에서 Controller를 취득
         Object handler = getHandler(request);
+        System.out.println("Handler : " + handler);
 
         if (handler == null){
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -58,9 +67,9 @@ public class FrontControllerServletV5 extends HttpServlet {
 
         MyHandlerAdapter adapter = getHandlerAdapter(handler);
 
-        //paramMap
-        Map<String, String> parmaMap = createParamMap(request);
-        ModelView mv = controller.process(parmaMap);
+        ModelView mv = adapter.handle(request, response, handler);
+
+
         String viewName = mv.getViewName();
 
         MyView view = viewResolver(viewName);
@@ -71,6 +80,7 @@ public class FrontControllerServletV5 extends HttpServlet {
         MyHandlerAdapter a;
         for (MyHandlerAdapter adapter : handlerAdapters) {
             if (adapter.supports(handler)){
+                System.out.println("##### Adapter : " + adapter);
                 return adapter;
             }
         }
@@ -87,5 +97,9 @@ public class FrontControllerServletV5 extends HttpServlet {
         request.getParameterNames().asIterator()
                 .forEachRemaining(paramName -> parmaMap.put(paramName, request.getParameter(paramName)));
         return parmaMap;
+    }
+
+    private static @NonNull MyView viewResolver(String viewName) {
+        return new MyView("/WEB-INF/views/" + viewName + ".jsp");
     }
 }
