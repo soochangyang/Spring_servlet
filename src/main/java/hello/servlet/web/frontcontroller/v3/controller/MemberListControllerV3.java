@@ -20,6 +20,6 @@ public class MemberListControllerV3 implements ControllerV3 {
         ModelView mv = new ModelView("member-list");
         mv.getModel().put("members", members);
 
-        return null;
+        return mv;
     }
 }
