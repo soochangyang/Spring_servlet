@@ -3,9 +3,11 @@ package hello.servlet;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.server.servlet.context.ServletComponentScan;
+import org.springframework.context.annotation.Bean;
+import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 
-@ServletComponentScan
+@ServletComponentScan //서블릿 자동 등록
 @SpringBootApplication
 public class ServletApplication {
 
@@ -13,4 +15,10 @@ public class ServletApplication {
 		SpringApplication.run(ServletApplication.class, args);
 	}
 
+	/* application.properties에 viewresolver 을 설정하면 됨 (아래는 수기로하는 방법)
+	@Bean
+	InternalResourceViewResolver internalResourceViewResolver(){
+		return new InternalResourceViewResolver("/WEB-INF/views/", ".jsp");
+	}
+   */
 }
